@@ -8,7 +8,7 @@ const MOCK_USERS = [
   { id: '2', name: 'Nomsa K.', email: 'n***@tut.ac.za', role: 'student', scans: 8, riskScore: 22, status: 'active', lastSeen: '1 hr ago' },
   { id: '3', name: 'Sipho D.', email: 's***@gmail.com', role: 'business', scans: 34, riskScore: 67, status: 'flagged', lastSeen: '3 hr ago' },
   { id: '4', name: 'Lerato B.', email: 'l***@wits.ac.za', role: 'student', scans: 5, riskScore: 15, status: 'active', lastSeen: '1 day ago' },
-  { id: '5', name: 'Admin User', email: 'a***@guardianai.co.za', role: 'admin', scans: 89, riskScore: 8, status: 'active', lastSeen: 'now' },
+  { id: '5', name: 'Admin User', email: 'a***@neurodefend.co.za', role: 'admin', scans: 89, riskScore: 8, status: 'active', lastSeen: 'now' },
 ]
 
 const SYSTEM_STATS = [

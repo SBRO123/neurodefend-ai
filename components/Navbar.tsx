@@ -23,7 +23,7 @@ export default function Navbar() {
           <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
             <Shield className="w-4 h-4 text-cyan-400" />
           </div>
-          <span className="font-bold text-white">Guardian<span className="text-cyan-400">AI</span></span>
+          <span className="font-bold text-white">NeuroDefend<span className="text-cyan-400"> AI</span></span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

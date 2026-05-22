@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'GuardianAI — Cybersecurity Protection',
-  description: 'AI-powered phishing detection and cybersecurity protection for South Africa',
+  title: 'NeuroDefend AI — Detect. Protect. Empower.',
+  description: 'AI-powered phishing detection and real-time threat monitoring for South Africa',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

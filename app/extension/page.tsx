@@ -77,12 +77,12 @@ export default function ExtensionPage() {
             <Shield className="w-8 h-8 text-cyan-400" />
           </div>
           <div className="text-left">
-            <h1 className="text-3xl font-black text-white">GuardianAI Browser Shield</h1>
+            <h1 className="text-3xl font-black text-white">NeuroDefend AI Browser Shield</h1>
             <p className="text-slate-400 text-sm">Real-time protection while you browse</p>
           </div>
         </div>
         <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed mb-8">
-          The GuardianAI browser extension scans every website, link, and form in real-time — protecting you from phishing sites, fake login pages, and malicious URLs before you even click.
+          The NeuroDefend AI browser extension scans every website, link, and form in real-time — protecting you from phishing sites, fake login pages, and malicious URLs before you even click.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button className="flex items-center justify-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl transition-all">
@@ -141,7 +141,7 @@ export default function ExtensionPage() {
               {scanning ? (
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin" />
-                  <p className="text-sm text-slate-400">GuardianAI Shield scanning {DEMO_SITES[activeDemo].url}...</p>
+                  <p className="text-sm text-slate-400">NeuroDefend AI Shield scanning {DEMO_SITES[activeDemo].url}...</p>
                 </div>
               ) : scanResult && (
                 <div>
@@ -216,7 +216,7 @@ export default function ExtensionPage() {
       {/* Browser support */}
       <div className="glass rounded-xl border border-white/5 p-6 text-center">
         <h2 className="font-bold text-white mb-2">Browser Support</h2>
-        <p className="text-slate-400 text-sm mb-6">GuardianAI Shield will be available on all major browsers</p>
+        <p className="text-slate-400 text-sm mb-6">NeuroDefend AI Shield will be available on all major browsers</p>
         <div className="flex flex-wrap justify-center gap-6">
           {[
             { name: 'Chrome', icon: '🟡', status: 'Beta' },

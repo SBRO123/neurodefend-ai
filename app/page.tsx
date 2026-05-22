@@ -34,7 +34,7 @@ export default function LandingPage() {
             <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
               <Shield className="w-4 h-4 text-cyan-400" />
             </div>
-            <span className="font-bold text-white">Guardian<span className="text-cyan-400">AI</span></span>
+            <span className="font-bold text-white">NeuroDefend<span className="text-cyan-400"> AI</span></span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm text-slate-400">
             <Link href="#features" className="hover:text-white transition-colors">Features</Link>
@@ -67,7 +67,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            GuardianAI detects phishing links, NSFAS bursary scams, fake job offers, WhatsApp fraud, and banking scams in real-time using advanced AI analysis.
+            NeuroDefend AI detects phishing links, NSFAS bursary scams, fake job offers, WhatsApp fraud, and banking scams in real-time using advanced AI analysis.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -149,7 +149,7 @@ export default function LandingPage() {
       {/* How it works */}
       <section id="how-it-works" className="py-20 px-4 border-t border-white/5">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-black text-white mb-12">How GuardianAI Works</h2>
+          <h2 className="text-3xl font-black text-white mb-12">How NeuroDefend AI Works</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { step: '01', title: 'Paste or Upload', desc: 'Paste a suspicious message, link, email, or upload a screenshot', icon: Search },
@@ -223,7 +223,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm text-slate-500">GuardianAI — Protecting South Africa from Cybercrime</span>
+            <span className="text-sm text-slate-500">NeuroDefend AI — Detect. Protect. Empower.</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-slate-600">
             <span>SABRIC: 011 847 3000</span>

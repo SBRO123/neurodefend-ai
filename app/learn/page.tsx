@@ -39,7 +39,7 @@ const CHATBOT_QA: Record<string, string> = {
   'what is nsfas scam': 'NSFAS scams involve fraudsters pretending to be NSFAS officials via WhatsApp or SMS, asking for banking details to "process" your bursary. NSFAS only communicates through myNSFAS.org.za — never WhatsApp.',
   'how do i report': 'Report scams to: SABRIC (011 847 3000), SA Fraud Hotline (0800 00 2870), SAPS Cybercrime (10111), or forward SMS scams to 7726. You can also report on our community page.',
   'what is sim swap': 'SIM swap fraud is when criminals convince your network provider to transfer your number to a SIM they control, letting them intercept your OTPs and access your bank accounts.',
-  'how to stay safe': 'Key rules: 1) Never share OTPs. 2) Verify senders independently. 3) Enable 2FA on all accounts. 4) Check URLs before clicking. 5) Use GuardianAI to scan suspicious messages.',
+  'how to stay safe': 'Key rules: 1) Never share OTPs. 2) Verify senders independently. 3) Enable 2FA on all accounts. 4) Check URLs before clicking. 5) Use NeuroDefend AI to scan suspicious messages.',
   'what is otp': 'An OTP (One-Time PIN) is a temporary code sent to your phone to verify your identity. NEVER share it with anyone — not even someone claiming to be from your bank or NSFAS.',
   'absa': 'ABSA will never ask for your OTP, PIN, or full card number via SMS or WhatsApp. If you receive such a message, it is a scam. Call ABSA directly on 0860 008 600.',
   'fnb': 'FNB will never request your password or OTP via message. Contact FNB directly on 087 575 9404 if you receive suspicious messages claiming to be from them.',
@@ -58,7 +58,7 @@ export default function LearnPage() {
   const [openScam, setOpenScam] = useState<number | null>(0)
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'ai'; msg: string }[]>([
-    { role: 'ai', msg: 'Hi! I\'m GuardianAI Assistant. Ask me anything: "What is phishing?", "What is a SIM swap?", "How do I stay safe?"' }
+    { role: 'ai', msg: 'Hi! I\'m NeuroDefend AI Assistant. Ask me anything: "What is phishing?", "What is a SIM swap?", "How do I stay safe?"' }
   ])
   const chatEndRef = useRef<HTMLDivElement>(null)
   const [reportForm, setReportForm] = useState({ type: 'WhatsApp Scam', description: '', location: '' })

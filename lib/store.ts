@@ -17,9 +17,9 @@ export interface UserStats {
   reportedScams: number
 }
 
-const SCANS_KEY = 'guardianai_scans'
-const STATS_KEY = 'guardianai_stats'
-const REPORTS_KEY = 'guardianai_reports'
+const SCANS_KEY = 'neurodefend_scans'
+const STATS_KEY = 'neurodefend_stats'
+const REPORTS_KEY = 'neurodefend_reports'
 
 function isBrowser() { return typeof window !== 'undefined' }
 

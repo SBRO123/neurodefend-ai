@@ -60,7 +60,7 @@ export default function ScanPage() {
 
   const handleCopy = () => {
     if (!result) return
-    const text = `GuardianAI Scan Result\nRisk Score: ${result.riskScore}/100\nThreat Level: ${result.threatLevel.toUpperCase()}\n\n${result.explanation}\n\nAI Reasoning: ${result.aiReasoning}\n\nRecommendations:\n${result.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}`
+    const text = `NeuroDefend AI Scan Result\nRisk Score: ${result.riskScore}/100\nThreat Level: ${result.threatLevel.toUpperCase()}\n\n${result.explanation}\n\nAI Reasoning: ${result.aiReasoning}\n\nRecommendations:\n${result.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}`
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -69,7 +69,7 @@ export default function ScanPage() {
   const handleShare = () => {
     if (!result) return
     if (navigator.share) {
-      navigator.share({ title: 'GuardianAI Scan Result', text: `Risk Score: ${result.riskScore}/100 — ${result.threatLevel.toUpperCase()}. ${result.explanation}`, url: window.location.href })
+      navigator.share({ title: 'NeuroDefend AI Scan Result', text: `Risk Score: ${result.riskScore}/100 — ${result.threatLevel.toUpperCase()}. ${result.explanation}`, url: window.location.href })
     } else handleCopy()
   }
 

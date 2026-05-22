@@ -5,7 +5,7 @@ async function analyzeWithGemini(content: string) {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) return null
 
-  const prompt = `You are a cybersecurity AI specializing in South African scams. Analyze this message for phishing, scams, or fraud:
+  const prompt = `You are a cybersecurity AI specializing in South African scams. Analyze this message for phishing, scams, or fraud (NeuroDefend AI):
 
 "${content}"
 
