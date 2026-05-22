@@ -32,12 +32,25 @@ export default function ScanPage() {
     if (!input.trim()) return
     setScanning(true)
     setResult(null)
-    await new Promise(r => setTimeout(r, 1200))
-    const res = analyzeContent(input)
-    saveScam(input, res)
-    setResult(res)
+    try {
+      const res = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: input.trim() })
+      })
+      const data = await res.json()
+      if (data.success) {
+        saveScam(input, data.result)
+        setResult(data.result)
+        setTab('scan')
+      }
+    } catch {
+      // fallback to client-side scanner
+      const res = analyzeContent(input)
+      saveScam(input, res)
+      setResult(res)
+    }
     setScanning(false)
-    setTab('scan')
   }
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
