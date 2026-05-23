@@ -24,6 +24,7 @@ export default function ScanPage() {
   const [copied, setCopied] = useState(false)
   const [tab, setTab] = useState<Tab>('scan')
   const [history, setHistory] = useState<StoredScan[]>([])
+  const [engine, setEngine] = useState<'gemini' | 'rule-based' | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setHistory(getScans()) }, [tab])
@@ -32,6 +33,7 @@ export default function ScanPage() {
     if (!input.trim()) return
     setScanning(true)
     setResult(null)
+    setEngine(null)
     try {
       const res = await fetch('/api/scan', {
         method: 'POST',
@@ -42,13 +44,14 @@ export default function ScanPage() {
       if (data.success) {
         saveScam(input, data.result)
         setResult(data.result)
+        setEngine(data.engine)
         setTab('scan')
       }
     } catch {
-      // fallback to client-side scanner
       const res = analyzeContent(input)
       saveScam(input, res)
       setResult(res)
+      setEngine('rule-based')
     }
     setScanning(false)
   }
@@ -197,6 +200,20 @@ export default function ScanPage() {
           {/* Results */}
           {result && (
             <div className="mt-8 space-y-4">
+              {/* Engine indicator */}
+              {engine && (
+                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${
+                  engine === 'gemini'
+                    ? 'bg-purple-500/10 border-purple-500/30 text-purple-400'
+                    : 'bg-slate-500/10 border-slate-500/20 text-slate-400'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${engine === 'gemini' ? 'bg-purple-400 animate-pulse' : 'bg-slate-500'}`} />
+                  {engine === 'gemini'
+                    ? '✓ Powered by Gemini AI — Real AI analysis'
+                    : '⚙ Rule-based engine — Add GEMINI_API_KEY to Vercel for real AI'}
+                </div>
+              )}
+
               {/* Score header */}
               <div className={`glass rounded-xl p-6 border ${
                 result.threatLevel === 'dangerous' ? 'border-red-500/30 bg-red-500/5' :
