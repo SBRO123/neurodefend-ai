@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { BookOpen, MessageCircle, Award, Send, ChevronDown, ChevronUp, Shield, AlertTriangle, Smartphone, CreditCard, GraduationCap, Briefcase, CheckCircle } from 'lucide-react'
 import { SECURITY_TIPS } from '@/lib/demoData'
-import { submitCommunityReport, getStats, completeModule, getAwarenessLevel } from '@/lib/store'
+import { getStats, completeModule, getAwarenessLevel } from '@/lib/store'
 
 const SCAM_TYPES = [
   {
@@ -61,8 +61,6 @@ export default function LearnPage() {
     { role: 'ai', msg: 'Hi! I\'m NeuroDefend AI Assistant. Ask me anything: "What is phishing?", "What is a SIM swap?", "How do I stay safe?"' }
   ])
   const chatEndRef = useRef<HTMLDivElement>(null)
-  const [reportForm, setReportForm] = useState({ type: 'WhatsApp Scam', description: '', location: '' })
-  const [reportSubmitted, setReportSubmitted] = useState(false)
   const [stats, setStats] = useState(getStats())
   const awareness = getAwarenessLevel(stats.securityScore)
 
@@ -83,14 +81,6 @@ export default function LearnPage() {
   const handleModuleComplete = (moduleId: string) => {
     completeModule(moduleId)
     setStats(getStats())
-  }
-
-  const handleReportSubmit = () => {
-    if (!reportForm.description.trim() || !reportForm.location.trim()) return
-    submitCommunityReport(reportForm.type, reportForm.description, reportForm.location)
-    setReportSubmitted(true)
-    setStats(getStats())
-    setTimeout(() => { setReportSubmitted(false); setReportForm({ type: 'WhatsApp Scam', description: '', location: '' }) }, 3000)
   }
 
   const colorMap: Record<string, string> = {
@@ -171,54 +161,24 @@ export default function LearnPage() {
             </div>
           </div>
 
-          {/* Real scam report form */}
+          {/* Official reporting contacts only */}
           <div id="report" className="glass rounded-xl border border-red-500/20 bg-red-500/3 p-5">
             <h2 className="font-semibold text-white flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-4 h-4 text-red-400" /> Report a Scam to the Community
+              <AlertTriangle className="w-4 h-4 text-red-400" /> Official Reporting Channels
             </h2>
-            {reportSubmitted ? (
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                <CheckCircle className="w-5 h-5 text-green-400" />
-                <div>
-                  <p className="text-sm font-semibold text-green-400">Report submitted!</p>
-                  <p className="text-xs text-slate-400">Your report helps protect other South Africans. +5 security points earned.</p>
+            <p className="text-sm text-slate-400 mb-4">To report a scam to the community, go to the <a href="/analytics" className="text-cyan-400 hover:underline">Analytics page</a>. For official reporting:</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { org: 'SABRIC', contact: '011 847 3000' },
+                { org: 'Fraud Hotline', contact: '0800 00 2870' },
+                { org: 'SAPS', contact: '10111' },
+                { org: 'SMS Spam', contact: 'Fwd to 7726' },
+              ].map(({ org, contact }, i) => (
+                <div key={i} className="p-2 rounded-lg bg-white/2 border border-white/5">
+                  <p className="text-xs font-semibold text-white">{org}</p>
+                  <p className="text-xs text-cyan-400 font-mono">{contact}</p>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <select value={reportForm.type} onChange={e => setReportForm(f => ({ ...f, type: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-red-500/30">
-                  {['WhatsApp Scam', 'SMS Phishing', 'Banking Fraud', 'Fake Job', 'NSFAS Scam', 'SIM Swap', 'Email Phishing', 'Other'].map(t => (
-                    <option key={t} value={t} className="bg-[#0d1224]">{t}</option>
-                  ))}
-                </select>
-                <textarea value={reportForm.description} onChange={e => setReportForm(f => ({ ...f, description: e.target.value }))}
-                  placeholder="Describe the scam (what happened, what was said, what was requested)..."
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-red-500/30 resize-none min-h-[80px]" />
-                <input value={reportForm.location} onChange={e => setReportForm(f => ({ ...f, location: e.target.value }))}
-                  placeholder="Your location (e.g. Pretoria, GP)"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-red-500/30" />
-                <button onClick={handleReportSubmit} disabled={!reportForm.description.trim() || !reportForm.location.trim()}
-                  className="w-full py-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-semibold text-sm rounded-lg transition-all disabled:opacity-40">
-                  Submit Report to Community
-                </button>
-              </div>
-            )}
-            <div className="mt-4 pt-4 border-t border-white/5">
-              <p className="text-xs text-slate-500 mb-2">Official reporting channels:</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { org: 'SABRIC', contact: '011 847 3000' },
-                  { org: 'Fraud Hotline', contact: '0800 00 2870' },
-                  { org: 'SAPS', contact: '10111' },
-                  { org: 'SMS Spam', contact: 'Fwd to 7726' },
-                ].map(({ org, contact }, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-white/2 border border-white/5">
-                    <p className="text-xs font-semibold text-white">{org}</p>
-                    <p className="text-xs text-cyan-400 font-mono">{contact}</p>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         </div>

@@ -1,9 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { TrendingUp, MapPin, Users, AlertTriangle, ThumbsUp } from 'lucide-react'
+import { TrendingUp, MapPin, Users, AlertTriangle, ThumbsUp, CheckCircle, Send } from 'lucide-react'
 import { THREAT_TREND_DATA, SCAM_CATEGORIES, SA_HEATMAP_DATA, COMMUNITY_REPORTS } from '@/lib/demoData'
-import { getCommunityReports, upvoteReport, CommunityReport, timeAgo } from '@/lib/store'
+import { getCommunityReports, upvoteReport, submitCommunityReport, CommunityReport, timeAgo } from '@/lib/store'
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
@@ -21,12 +21,22 @@ export default function AnalyticsPage() {
   const totalScams = SA_HEATMAP_DATA.reduce((s, p) => s + p.scams, 0)
   const maxScams = Math.max(...SA_HEATMAP_DATA.map(p => p.scams))
   const [userReports, setUserReports] = useState<CommunityReport[]>([])
+  const [reportForm, setReportForm] = useState({ type: 'WhatsApp Scam', description: '', location: '' })
+  const [reportSubmitted, setReportSubmitted] = useState(false)
 
   useEffect(() => { setUserReports(getCommunityReports()) }, [])
 
   const handleUpvote = (id: string) => {
     upvoteReport(id)
     setUserReports(getCommunityReports())
+  }
+
+  const handleReportSubmit = () => {
+    if (!reportForm.description.trim() || !reportForm.location.trim()) return
+    submitCommunityReport(reportForm.type, reportForm.description, reportForm.location)
+    setReportSubmitted(true)
+    setUserReports(getCommunityReports())
+    setTimeout(() => { setReportSubmitted(false); setReportForm({ type: 'WhatsApp Scam', description: '', location: '' }) }, 3000)
   }
 
   const allReports = [
@@ -139,7 +149,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Bar chart + Community reports */}
+      {/* Community Reports + Submit Form */}
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="glass rounded-xl border border-white/5 p-5">
           <h2 className="font-semibold text-white mb-4">Scams by Province</h2>
@@ -158,34 +168,81 @@ export default function AnalyticsPage() {
           </ResponsiveContainer>
         </div>
 
-          <div className="glass rounded-xl border border-white/5 overflow-hidden">
-          <div className="p-4 border-b border-white/5 flex items-center justify-between">
-            <h2 className="font-semibold text-white flex items-center gap-2">
-              <Users className="w-4 h-4 text-cyan-400" /> Community Reports
-            </h2>
-            <span className="text-xs text-slate-500">{allReports.length} reports</span>
-          </div>
-          <div className="divide-y divide-white/3 max-h-80 overflow-y-auto">
-            {allReports.map(r => (
-              <div key={r.id} className="p-4 hover:bg-white/2 transition-all">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-0.5 bg-red-500/10 text-red-400 rounded-full border border-red-500/20">{r.type}</span>
-                    {r.isUser && <span className="text-xs px-1.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-full border border-cyan-500/20">You</span>}
-                  </div>
-                  <span className="text-xs text-slate-600">{r.time}</span>
-                </div>
-                <p className="text-sm text-slate-300 mb-1">{r.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3" />{r.location}</span>
-                  <button onClick={() => r.isUser && handleUpvote(r.id)}
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-cyan-400 transition-colors">
-                    <ThumbsUp className="w-3 h-3" /> {r.votes} confirmed
-                  </button>
-                </div>
+        {/* Submit Report Form */}
+        <div className="glass rounded-xl border border-red-500/20 bg-red-500/3 p-5">
+          <h2 className="font-semibold text-white flex items-center gap-2 mb-4">
+            <AlertTriangle className="w-4 h-4 text-red-400" /> Report a Scam to the Community
+          </h2>
+          {reportSubmitted ? (
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <div>
+                <p className="text-sm font-semibold text-green-400">Report submitted!</p>
+                <p className="text-xs text-slate-400">Your report helps protect other South Africans. +5 security points earned.</p>
               </div>
-            ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <select value={reportForm.type} onChange={e => setReportForm(f => ({ ...f, type: e.target.value }))}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-red-500/30">
+                {['WhatsApp Scam', 'SMS Phishing', 'Banking Fraud', 'Fake Job', 'NSFAS Scam', 'SIM Swap', 'Email Phishing', 'Other'].map(t => (
+                  <option key={t} value={t} className="bg-[#0d1224]">{t}</option>
+                ))}
+              </select>
+              <textarea value={reportForm.description} onChange={e => setReportForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="Describe the scam — what happened, what was said, what was requested..."
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-red-500/30 resize-none min-h-[90px]" />
+              <input value={reportForm.location} onChange={e => setReportForm(f => ({ ...f, location: e.target.value }))}
+                placeholder="Your location (e.g. Pretoria, GP)"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-red-500/30" />
+              <button onClick={handleReportSubmit} disabled={!reportForm.description.trim() || !reportForm.location.trim()}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-semibold text-sm rounded-lg transition-all disabled:opacity-40">
+                <Send className="w-4 h-4" /> Submit Report
+              </button>
+            </div>
+          )}
+          <div className="mt-4 pt-4 border-t border-white/5">
+            <p className="text-xs text-slate-500 mb-2">Official channels:</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[['SABRIC', '011 847 3000'], ['Fraud Hotline', '0800 00 2870'], ['SAPS', '10111'], ['SMS Spam', 'Fwd to 7726']].map(([org, contact], i) => (
+                <div key={i} className="p-2 rounded-lg bg-white/2 border border-white/5">
+                  <p className="text-xs font-semibold text-white">{org}</p>
+                  <p className="text-xs text-cyan-400 font-mono">{contact}</p>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Community Reports Feed */}
+      <div className="glass rounded-xl border border-white/5 overflow-hidden mt-6">
+        <div className="p-4 border-b border-white/5 flex items-center justify-between">
+          <h2 className="font-semibold text-white flex items-center gap-2">
+            <Users className="w-4 h-4 text-cyan-400" /> Community Reports
+          </h2>
+          <span className="text-xs text-slate-500">{allReports.length} reports</span>
+        </div>
+        <div className="divide-y divide-white/3 max-h-96 overflow-y-auto">
+          {allReports.map(r => (
+            <div key={r.id} className="p-4 hover:bg-white/2 transition-all">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-0.5 bg-red-500/10 text-red-400 rounded-full border border-red-500/20">{r.type}</span>
+                  {r.isUser && <span className="text-xs px-1.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-full border border-cyan-500/20">You</span>}
+                </div>
+                <span className="text-xs text-slate-600">{r.time}</span>
+              </div>
+              <p className="text-sm text-slate-300 mb-1">{r.description}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3" />{r.location}</span>
+                <button onClick={() => r.isUser && handleUpvote(r.id)}
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-cyan-400 transition-colors">
+                  <ThumbsUp className="w-3 h-3" /> {r.votes} confirmed
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
