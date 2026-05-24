@@ -30,28 +30,61 @@ Respond in this exact JSON format only, no extra text:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+          generationConfig: { 
+            temperature: 0.1, 
+            maxOutputTokens: 1024,
+            responseMimeType: "application/json"
+          },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          ]
         })
       }
     )
 
-    if (!res.ok) return null
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}))
+      console.error('Gemini API Error:', res.status, errorData)
+      return null
+    }
 
     const data = await res.json()
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
-    if (!text) return null
+    
+    if (!text) {
+      console.error('Gemini Error: No text in response', data)
+      if (data?.promptFeedback?.blockReason) {
+        console.error('Gemini Block Reason:', data.promptFeedback.blockReason)
+      }
+      return null
+    }
 
     // Extract JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return null
+    if (!jsonMatch) {
+      console.error('Gemini Error: Could not find JSON in response', text)
+      return null
+    }
 
-    const parsed = JSON.parse(jsonMatch[0])
+    try {
+      const parsed = JSON.parse(jsonMatch[0])
 
-    // Validate required fields exist
-    if (typeof parsed.riskScore !== 'number' || !parsed.threatLevel) return null
+      // Validate required fields exist
+      if (typeof parsed.riskScore !== 'number' || !parsed.threatLevel) {
+        console.error('Gemini Error: Missing required fields in JSON', parsed)
+        return null
+      }
 
-    return { ...parsed, flags: [] }
-  } catch {
+      return { ...parsed, flags: [] }
+    } catch (e) {
+      console.error('Gemini Error: JSON Parse failed', e, jsonMatch[0])
+      return null
+    }
+  } catch (err) {
+    console.error('Gemini Analysis Exception:', err)
     return null
   }
 }
