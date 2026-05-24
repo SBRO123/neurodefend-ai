@@ -25,6 +25,7 @@ export default function ScanPage() {
   const [tab, setTab] = useState<Tab>('scan')
   const [history, setHistory] = useState<StoredScan[]>([])
   const [engine, setEngine] = useState<'gemini' | 'rule-based' | null>(null)
+  const [debugInfo, setDebugInfo] = useState<any>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setHistory(getScans()) }, [tab])
@@ -34,6 +35,7 @@ export default function ScanPage() {
     setScanning(true)
     setResult(null)
     setEngine(null)
+    setDebugInfo(null)
     try {
       const res = await fetch('/api/scan', {
         method: 'POST',
@@ -45,6 +47,7 @@ export default function ScanPage() {
         saveScam(input, data.result)
         setResult(data.result)
         setEngine(data.engine)
+        if (data.debug) setDebugInfo(data.debug)
         setTab('scan')
       }
     } catch {
@@ -202,15 +205,24 @@ export default function ScanPage() {
             <div className="mt-8 space-y-4">
               {/* Engine indicator */}
               {engine && (
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${
+                <div className={`flex flex-col gap-2 p-3 rounded-lg border text-xs font-medium ${
                   engine === 'gemini'
                     ? 'bg-purple-500/10 border-purple-500/30 text-purple-400'
                     : 'bg-slate-500/10 border-slate-500/20 text-slate-400'
                 }`}>
-                  <span className={`w-2 h-2 rounded-full ${engine === 'gemini' ? 'bg-purple-400 animate-pulse' : 'bg-slate-500'}`} />
-                  {engine === 'gemini'
-                    ? '✓ Powered by Gemini AI — Real AI analysis'
-                    : '⚙ Rule-based engine — Add GEMINI_API_KEY to Vercel for real AI'}
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${engine === 'gemini' ? 'bg-purple-400 animate-pulse' : 'bg-slate-500'}`} />
+                    {engine === 'gemini'
+                      ? '✓ Powered by Gemini AI — Real AI analysis'
+                      : '⚙ Rule-based engine — Add GEMINI_API_KEY to Vercel for real AI'}
+                  </div>
+                  
+                  {/* Debug Info for User */}
+                  {engine === 'rule-based' && debugInfo && (
+                    <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 font-mono">
+                      DEBUG: {JSON.stringify(debugInfo)}
+                    </div>
+                  )}
                 </div>
               )}
 
