@@ -40,11 +40,30 @@ function tryParseJson(text: string) {
   return null
 }
 
+async function callGemini(model: string, prompt: string, apiKey: string) {
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1000 }
+        })
+      }
+    )
+    return res
+  } catch (e) {
+    return null
+  }
+}
+
 async function analyzeWithGemini(content: string) {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) return { error: 'Missing API Key' }
 
-  const prompt = `Analyze this South African message for phishing/scams. Respond ONLY with this JSON (be brief):
+  const prompt = `Analyze this for phishing/scams. Respond ONLY with this JSON (be brief):
 {
   "riskScore": number,
   "threatLevel": "safe|suspicious|dangerous",
@@ -56,38 +75,32 @@ async function analyzeWithGemini(content: string) {
   "recommendations": ["action"],
   "educationTip": "tip"
 }
-
 Message: "${content}"`
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { 
-            temperature: 0.1,
-            maxOutputTokens: 1000
-          }
-        })
-      }
-    )
+    // Fallback chain: 2.5-flash -> 1.5-flash
+    const models = ['gemini-2.5-flash', 'gemini-1.5-flash']
+    let lastError = null
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}))
-      return { error: `API Error ${res.status}`, details: errorData?.error?.message }
+    for (const modelName of models) {
+      const res = await callGemini(modelName, prompt, apiKey)
+      
+      if (res && res.ok) {
+        const data = await res.json()
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+        if (text) {
+          const parsed = tryParseJson(text)
+          if (parsed) return { ...parsed, flags: [] }
+        }
+      } else if (res) {
+        const errorData = await res.json().catch(() => ({}))
+        lastError = { error: `API Error ${res.status}`, details: errorData?.error?.message, model: modelName }
+        // If it's a 503, try the next model immediately
+        if (res.status === 503) continue
+      }
     }
 
-    const data = await res.json()
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
-    if (!text) return { error: 'No response text' }
-
-    const parsed = tryParseJson(text)
-    if (!parsed) return { error: 'Invalid JSON format', raw: text.slice(0, 500) }
-
-    return { ...parsed, flags: [] }
+    return lastError || { error: 'All models failed' }
   } catch (err: any) {
     return { error: 'Exception occurred', message: err.message }
   }
