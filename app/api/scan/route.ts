@@ -43,7 +43,7 @@ function tryParseJson(text: string) {
 async function callGemini(model: string, prompt: string, apiKey: string) {
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,7 +63,7 @@ async function analyzeWithGemini(content: string) {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) return { error: 'Missing API Key' }
 
-  const prompt = `Analyze this for phishing/scams. Respond ONLY with this JSON (be brief):
+  const prompt = `Analyze this for cybersecurity threats (phishing/scams). Respond ONLY with this JSON (be brief):
 {
   "riskScore": number,
   "threatLevel": "safe|suspicious|dangerous",
@@ -78,7 +78,7 @@ async function analyzeWithGemini(content: string) {
 Message: "${content}"`
 
   try {
-    // Fallback chain using verified model names from diagnostic
+    // Verified models from v1beta diagnostic list
     const models = ['gemini-2.5-flash', 'gemini-flash-latest']
     let lastError = null
 
