@@ -78,8 +78,8 @@ async function analyzeWithGemini(content: string) {
 Message: "${content}"`
 
   try {
-    // Fallback chain: 2.5-flash -> 1.5-flash
-    const models = ['gemini-2.5-flash', 'gemini-1.5-flash']
+    // Fallback chain using verified model names from diagnostic
+    const models = ['gemini-2.5-flash', 'gemini-flash-latest']
     let lastError = null
 
     for (const modelName of models) {
