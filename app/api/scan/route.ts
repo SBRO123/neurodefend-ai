@@ -88,15 +88,21 @@ Message: "${content}"`
       if (res && res.ok) {
         const data = await res.json()
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+        
         if (text) {
           const parsed = tryParseJson(text)
           if (parsed) return { ...parsed, flags: [] }
+          
+          lastError = { error: 'Invalid JSON format', raw: text.slice(0, 200), model: modelName }
+        } else {
+          lastError = { error: 'Empty response text', model: modelName }
         }
       } else if (res) {
         const errorData = await res.json().catch(() => ({}))
         lastError = { error: `API Error ${res.status}`, details: errorData?.error?.message, model: modelName }
-        // If it's a 503, try the next model immediately
         if (res.status === 503) continue
+      } else {
+        lastError = { error: 'Fetch failed (null response)', model: modelName }
       }
     }
 
