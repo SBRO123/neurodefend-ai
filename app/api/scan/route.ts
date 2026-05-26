@@ -2,20 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { analyzeContent } from '@/lib/scanner'
 
 function tryParseJson(text: string) {
+  const trimmed = text.trim()
   try {
     // 1. Try direct parse
-    return JSON.parse(text.trim())
+    return JSON.parse(trimmed)
   } catch (e) {}
 
   try {
     // 2. Try to extract JSON from markdown or text
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    const jsonMatch = trimmed.match(/\{[\s\S]*\}/)
     if (jsonMatch) return JSON.parse(jsonMatch[0])
   } catch (e) {}
 
   // 3. Aggressive repair for truncated JSON
   try {
-    let fixed = text.trim()
+    let fixed = trimmed
     const start = fixed.indexOf('{')
     if (start === -1) return null
     fixed = fixed.slice(start)
@@ -31,11 +32,16 @@ function tryParseJson(text: string) {
        }
     }
     
-    // Close open string, then arrays, then objects
+    // Repair steps
     if (inString) fixed += '"'
+    
+    // Remove a trailing comma if the JSON was cut off mid-object
+    fixed = fixed.replace(/,\s*$/, '')
+    
     while (brackets > 0) { fixed += ']'; brackets-- }
     while (braces > 0) { fixed += '}'; braces-- }
     
+    // Final attempt at parsing repaired string
     return JSON.parse(fixed)
   } catch (e) {}
   return null
@@ -52,9 +58,15 @@ async function callGemini(model: string, prompt: string, apiKey: string) {
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { 
             temperature: 0.1, 
-            maxOutputTokens: 800,
+            maxOutputTokens: 2048,
             responseMimeType: "application/json"
-          }
+          },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          ]
         })
       }
     )
@@ -69,22 +81,21 @@ async function analyzeWithGemini(content: string) {
   if (!apiKey) return { error: 'Missing API Key' }
 
   const prompt = `Analyze this South African message for phishing/scams. 
-Respond ONLY with this JSON (keep all strings under 100 characters):
+Respond ONLY with this JSON:
 {
   "riskScore": number,
   "threatLevel": "safe|suspicious|dangerous",
   "category": "string",
-  "explanation": "ultra-short",
-  "aiReasoning": "ultra-short",
-  "reasoningSteps": ["step"],
-  "highlightedPhrases": ["phrase"],
-  "recommendations": ["action"],
-  "educationTip": "tip"
+  "explanation": "string",
+  "aiReasoning": "string",
+  "reasoningSteps": ["string"],
+  "highlightedPhrases": ["string"],
+  "recommendations": ["string"],
+  "educationTip": "string"
 }
 Message: "${content}"`
 
   try {
-    // Verified models from v1beta diagnostic list
     const models = ['gemini-2.5-flash', 'gemini-flash-latest']
     let lastError = null
 
@@ -99,7 +110,7 @@ Message: "${content}"`
           const parsed = tryParseJson(text)
           if (parsed) return { ...parsed, flags: [] }
           
-          lastError = { error: 'Invalid JSON format', raw: text.slice(0, 200), model: modelName }
+          lastError = { error: 'Invalid JSON format', raw: text.slice(0, 500), model: modelName }
         } else {
           lastError = { error: 'Empty response text', model: modelName }
         }
