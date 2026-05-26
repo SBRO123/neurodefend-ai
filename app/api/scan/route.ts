@@ -22,7 +22,7 @@ function tryParseJson(text: string) {
     
     let braces = 0, brackets = 0, inString = false
     for (let i = 0; i < fixed.length; i++) {
-       if (fixed[i] === '"' && fixed[i-1] !== '\\') inString = !inString
+       if (fixed[i] === '"' && (i === 0 || fixed[i-1] !== '\\')) inString = !inString
        if (!inString) {
          if (fixed[i] === '{') braces++
          else if (fixed[i] === '}') braces--
@@ -31,6 +31,7 @@ function tryParseJson(text: string) {
        }
     }
     
+    // Close open string, then arrays, then objects
     if (inString) fixed += '"'
     while (brackets > 0) { fixed += ']'; brackets-- }
     while (braces > 0) { fixed += '}'; braces-- }
@@ -49,7 +50,11 @@ async function callGemini(model: string, prompt: string, apiKey: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1000 }
+          generationConfig: { 
+            temperature: 0.1, 
+            maxOutputTokens: 800,
+            responseMimeType: "application/json"
+          }
         })
       }
     )
@@ -63,13 +68,14 @@ async function analyzeWithGemini(content: string) {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) return { error: 'Missing API Key' }
 
-  const prompt = `Analyze this for cybersecurity threats (phishing/scams). Respond ONLY with this JSON (be brief):
+  const prompt = `Analyze this South African message for phishing/scams. 
+Respond ONLY with this JSON (keep all strings under 100 characters):
 {
   "riskScore": number,
   "threatLevel": "safe|suspicious|dangerous",
   "category": "string",
-  "explanation": "short",
-  "aiReasoning": "short",
+  "explanation": "ultra-short",
+  "aiReasoning": "ultra-short",
   "reasoningSteps": ["step"],
   "highlightedPhrases": ["phrase"],
   "recommendations": ["action"],
